@@ -39,7 +39,7 @@ impl Theme for SyntarkTheme {
                 darken(self.category_color(Category::NormalBackground), 0.3)
             }
             Category::LineNumber => darken(self.category_color(Category::Normal), 0.75),
-            Category::MatchedBracket => palette::named::LIME,
+            Category::MatchedBracket => palette::named::YELLOW,
             Category::MessageSeparator => self.category_color(Category::Normal),
             Category::ModeMessage => self.category_color(Category::Normal),
             Category::NonText => palette::named::DIMGRAY,
