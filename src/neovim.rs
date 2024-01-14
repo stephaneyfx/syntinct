@@ -1,6 +1,7 @@
 use crate::{
     darken, lighten, style::UnderlineStyle, Category, DiagnosticLevel, Style, Theme, Token,
 };
+use heck::ToUpperCamelCase;
 use palette::Srgb;
 use std::{
     collections::HashMap,
@@ -125,6 +126,10 @@ enum HighlightName {
     MarkdownH2,
     MarkdownHeadingDelimiter,
     MarkdownLinkText,
+    // nvim-cmp
+    CmpItemAbbrMatch,
+    CmpItemAbbrMatchFuzzy,
+    CmpItemKind(LspType),
     // Telescope
     TelescopeBorder,
     TelescopeTitle,
@@ -246,6 +251,9 @@ impl HighlightName {
             Self::MarkdownH2 => "markdownH2".into(),
             Self::MarkdownHeadingDelimiter => "markdownHeadingDelimiter".into(),
             Self::MarkdownLinkText => "markdownLinkText".into(),
+            Self::CmpItemAbbrMatch => "CmpItemAbbrMatch".into(),
+            Self::CmpItemAbbrMatchFuzzy => "CmpItemAbbrMatchFuzzy".into(),
+            Self::CmpItemKind(k) => format!("CmpItemKind{}", k.to_string().to_upper_camel_case()),
             Self::TelescopeBorder => "TelescopeBorder".into(),
             Self::TelescopeTitle => "TelescopeTitle".into(),
         }
@@ -351,7 +359,7 @@ impl Display for Language {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, enum_iterator::Sequence)]
 enum LspType {
     Class,
     Decorator,
@@ -1050,6 +1058,22 @@ impl NeovimTheme {
                         .foreground(base.token_color(Token::Link))
                         .into(),
                 ),
+                (
+                    HighlightName::CmpItemAbbrMatch,
+                    HighlightName::Special.into(),
+                ),
+                (
+                    HighlightName::CmpItemAbbrMatchFuzzy,
+                    HighlightName::Special.into(),
+                ),
+            ])
+            .chain(enum_iterator::all::<LspType>().map(|lsp_type| {
+                (
+                    HighlightName::CmpItemKind(lsp_type),
+                    HighlightName::from(lsp_type).into(),
+                )
+            }))
+            .chain([
                 (
                     HighlightName::TelescopeBorder,
                     HighlightName::FloatBorder.into(),

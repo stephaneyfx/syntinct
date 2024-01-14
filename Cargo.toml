@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 enum-iterator = "1.4.1"
+heck = "0.4.1"
 palette = "0.7.3"
 serde = { version = "1.0.194", features = ["derive"] }
 thiserror = "1.0.56"
