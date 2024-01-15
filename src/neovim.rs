@@ -126,6 +126,8 @@ enum HighlightName {
     MarkdownH2,
     MarkdownHeadingDelimiter,
     MarkdownLinkText,
+    // TOML
+    TomlTable,
     // nvim-cmp
     CmpItemAbbrMatch,
     CmpItemAbbrMatchFuzzy,
@@ -251,6 +253,7 @@ impl HighlightName {
             Self::MarkdownH2 => "markdownH2".into(),
             Self::MarkdownHeadingDelimiter => "markdownHeadingDelimiter".into(),
             Self::MarkdownLinkText => "markdownLinkText".into(),
+            Self::TomlTable => "tomlTable".into(),
             Self::CmpItemAbbrMatch => "CmpItemAbbrMatch".into(),
             Self::CmpItemAbbrMatchFuzzy => "CmpItemAbbrMatchFuzzy".into(),
             Self::CmpItemKind(k) => format!("CmpItemKind{}", k.to_string().to_upper_camel_case()),
@@ -1056,6 +1059,12 @@ impl NeovimTheme {
                     HighlightName::MarkdownLinkText,
                     Style::default()
                         .foreground(base.token_color(Token::Link))
+                        .into(),
+                ),
+                (
+                    HighlightName::TomlTable,
+                    Style::default()
+                        .foreground(base.token_color(Token::Module))
                         .into(),
                 ),
                 (
