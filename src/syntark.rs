@@ -35,9 +35,7 @@ impl Theme for SyntarkTheme {
             Category::DiffText => self.category_color(Category::DiffAdd),
             Category::Folded => darken(self.category_color(Category::NormalBackground), 0.2),
             Category::InactiveTab => darken(self.category_color(Category::Normal), 0.75),
-            Category::InactiveTabBackground => {
-                darken(self.category_color(Category::NormalBackground), 0.3)
-            }
+            Category::InactiveTabBackground => palette::named::BLACK,
             Category::LineNumber => darken(self.category_color(Category::Normal), 0.75),
             Category::MatchedBracket => palette::named::YELLOW,
             Category::MessageSeparator => self.category_color(Category::Normal),
