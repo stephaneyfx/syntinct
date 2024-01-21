@@ -742,7 +742,12 @@ impl NeovimTheme {
                         .background(base.category_color(Category::ActiveTabBackground))
                         .into(),
                 ),
-                (HighlightName::Title, HighlightName::TabLineSel.into()),
+                (
+                    HighlightName::Title,
+                    Style::default()
+                        .foreground(base.category_color(Category::ActiveTab))
+                        .into(),
+                ),
                 (
                     HighlightName::Visual,
                     Style::default()
