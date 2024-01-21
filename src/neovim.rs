@@ -135,6 +135,8 @@ enum HighlightName {
     // Telescope
     TelescopeBorder,
     TelescopeTitle,
+    // lspconfig
+    LspInfoBorder,
 }
 
 impl HighlightName {
@@ -259,6 +261,7 @@ impl HighlightName {
             Self::CmpItemKind(k) => format!("CmpItemKind{}", k.to_string().to_upper_camel_case()),
             Self::TelescopeBorder => "TelescopeBorder".into(),
             Self::TelescopeTitle => "TelescopeTitle".into(),
+            Self::LspInfoBorder => "LspInfoBorder".into(),
         }
     }
 }
@@ -1088,6 +1091,10 @@ impl NeovimTheme {
                     HighlightName::FloatBorder.into(),
                 ),
                 (HighlightName::TelescopeTitle, HighlightName::Title.into()),
+                (
+                    HighlightName::LspInfoBorder,
+                    HighlightName::FloatBorder.into(),
+                ),
             ])
             .collect(),
         }
