@@ -37,7 +37,7 @@ impl Theme for SyntarkTheme {
             Category::InactiveTab => darken(self.category_color(Category::Normal), 0.75),
             Category::InactiveTabBackground => palette::named::BLACK,
             Category::LineNumber => darken(self.category_color(Category::Normal), 0.75),
-            Category::MatchedBracket => palette::named::YELLOW,
+            Category::MatchedBracket => palette::named::DEEPPINK,
             Category::MessageSeparator => self.category_color(Category::Normal),
             Category::ModeMessage => self.category_color(Category::Normal),
             Category::NonText => palette::named::DIMGRAY,
