@@ -36,4 +36,4 @@ The theme can be selected in neovim using the following:
 ```
 
 # Contribute
-All contributions shall be licensed under the [MIT license](https://spdx.org/licenses/MIT.html).
+All contributions shall be licensed under the [0BSD license](https://spdx.org/licenses/0BSD.html).
