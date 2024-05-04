@@ -4,21 +4,19 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils/main";
-
-    naersk = {
-      url = "github:nix-community/naersk/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, naersk }:
+  outputs = {self, nixpkgs, flake-utils}:
     let
+      packageDef = builtins.fromTOML (builtins.readFile ./Cargo.toml);
       packagesFor = pkgs:
         let
           system = pkgs.system;
-          buildRust = naersk.lib.${system}.buildPackage;
-          syntinct = buildRust {
-            root = self;
+          syntinct = pkgs.rustPlatform.buildRustPackage {
+            pname = packageDef.package.name;
+            version = packageDef.package.version;
+            src = ./.;
+            cargoLock.lockFile = ./Cargo.lock;
           };
           syntark-attrs = {
             version = syntinct.version;
