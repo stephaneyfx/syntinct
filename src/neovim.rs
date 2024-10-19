@@ -368,6 +368,7 @@ impl Display for Language {
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, enum_iterator::Sequence)]
 enum LspType {
     Class,
+    Const,
     Decorator,
     Derive,
     Enum,
@@ -392,6 +393,7 @@ impl LspType {
     fn to_string(&self) -> String {
         match self {
             Self::Class => "class".into(),
+            Self::Const => "const".into(),
             Self::Decorator => "decorator".into(),
             Self::Derive => "derive".into(),
             Self::Enum => "enum".into(),
@@ -524,7 +526,6 @@ impl NeovimTheme {
     pub fn new<T: Theme>(base: &T) -> Self {
         Self {
             highlights: vec![
-                // Built into Neovim
                 (
                     HighlightName::ColorColumn,
                     Style::default()
@@ -774,6 +775,12 @@ impl NeovimTheme {
                     LspType::Class.into(),
                     Style::default()
                         .foreground(base.token_color(Token::Type))
+                        .into(),
+                ),
+                (
+                    LspType::Const.into(),
+                    Style::default()
+                        .foreground(base.token_color(Token::Constant))
                         .into(),
                 ),
                 (
