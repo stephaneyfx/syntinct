@@ -369,6 +369,7 @@ impl Display for Language {
 enum LspType {
     Class,
     Const,
+    ConstParameter,
     Decorator,
     Derive,
     Enum,
@@ -394,6 +395,7 @@ impl LspType {
         match self {
             Self::Class => "class".into(),
             Self::Const => "const".into(),
+            Self::ConstParameter => "constParameter".into(),
             Self::Decorator => "decorator".into(),
             Self::Derive => "derive".into(),
             Self::Enum => "enum".into(),
@@ -781,6 +783,12 @@ impl NeovimTheme {
                     LspType::Const.into(),
                     Style::default()
                         .foreground(base.token_color(Token::Constant))
+                        .into(),
+                ),
+                (
+                    LspType::ConstParameter.into(),
+                    Style::default()
+                        .foreground(base.token_color(Token::ConstGenericParameter))
                         .into(),
                 ),
                 (

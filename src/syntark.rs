@@ -62,6 +62,7 @@ impl Theme for SyntarkTheme {
             Token::Character => palette::named::SEAGREEN,
             Token::Comment => palette::named::SLATEGRAY,
             Token::Constant => palette::named::LIGHTSALMON,
+            Token::ConstGenericParameter => self.token_color(Token::Constant),
             Token::Delimiter => palette::named::LIGHTCORAL,
             Token::DocComment => self.token_color(Token::Comment),
             Token::Enum => self.token_color(Token::Type),

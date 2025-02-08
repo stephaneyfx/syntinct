@@ -41,6 +41,7 @@ pub enum Token {
     Character,
     Comment,
     Constant,
+    ConstGenericParameter,
     Delimiter,
     DocComment,
     Enum,
