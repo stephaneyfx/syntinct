@@ -382,6 +382,7 @@ enum LspType {
     Namespace,
     Parameter,
     Property,
+    Static,
     Struct,
     Type,
     TypeAlias,
@@ -390,7 +391,10 @@ enum LspType {
 }
 
 impl LspType {
-    #[allow(clippy::inherent_to_string_shadow_display)]
+    #[allow(
+        clippy::inherent_to_string_shadow_display,
+        clippy::wrong_self_convention
+    )]
     fn to_string(&self) -> String {
         match self {
             Self::Class => "class".into(),
@@ -408,6 +412,7 @@ impl LspType {
             Self::Namespace => "namespace".into(),
             Self::Parameter => "parameter".into(),
             Self::Property => "property".into(),
+            Self::Static => "static".into(),
             Self::Struct => "struct".into(),
             Self::Type => "type".into(),
             Self::TypeAlias => "typeAlias".into(),
@@ -861,6 +866,12 @@ impl NeovimTheme {
                     LspType::Property.into(),
                     Style::default()
                         .foreground(base.token_color(Token::Field))
+                        .into(),
+                ),
+                (
+                    LspType::Static.into(),
+                    Style::default()
+                        .foreground(base.token_color(Token::Static))
                         .into(),
                 ),
                 (

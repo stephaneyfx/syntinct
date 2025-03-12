@@ -57,6 +57,7 @@ pub enum Token {
     Module,
     Operator,
     Parameter,
+    Static,
     String,
     Struct,
     Tag,

@@ -78,6 +78,7 @@ impl Theme for SyntarkTheme {
             Token::Module => palette::named::AQUAMARINE,
             Token::Operator => palette::named::DODGERBLUE,
             Token::Parameter => self.token_color(Token::Variable),
+            Token::Static => palette::named::SLATEBLUE,
             Token::String => palette::named::FORESTGREEN,
             Token::Struct => self.token_color(Token::Type),
             Token::Tag => palette::named::CADETBLUE,
