@@ -382,6 +382,7 @@ enum LspType {
     Namespace,
     Parameter,
     Property,
+    SelfKeyword,
     Static,
     Struct,
     Type,
@@ -412,6 +413,7 @@ impl LspType {
             Self::Namespace => "namespace".into(),
             Self::Parameter => "parameter".into(),
             Self::Property => "property".into(),
+            Self::SelfKeyword => "selfKeyword".into(),
             Self::Static => "static".into(),
             Self::Struct => "struct".into(),
             Self::Type => "type".into(),
@@ -526,608 +528,22 @@ impl From<HighlightName> for Highlight {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NeovimTheme {
-    highlights: HashMap<HighlightName, Highlight>,
+    name: String,
+    dark_highlights: HashMap<HighlightName, Highlight>,
+    light_highlights: HashMap<HighlightName, Highlight>,
 }
 
 impl NeovimTheme {
-    pub fn new<T: Theme>(base: &T) -> Self {
+    pub fn new<S, D, L>(name: S, dark_base: &D, light_base: &L) -> Self
+    where
+        S: Into<String>,
+        D: Theme,
+        L: Theme,
+    {
         Self {
-            highlights: vec![
-                (
-                    HighlightName::ColorColumn,
-                    Style::default()
-                        .background(base.category_color(Category::ColumnGuide))
-                        .into(),
-                ),
-                (HighlightName::Conceal, Style::default().into()),
-                (
-                    HighlightName::CurSearch,
-                    Style::default()
-                        .foreground(base.category_color(Category::Search))
-                        .background(base.category_color(Category::ActiveSearchMatch))
-                        .into(),
-                ),
-                (HighlightName::Cursor, Style::reverse().into()),
-                (HighlightName::CursorIM, HighlightName::Cursor.into()),
-                (HighlightName::CursorColumn, Style::default().into()),
-                (
-                    HighlightName::CursorLine,
-                    Style::default()
-                        .background(base.category_color(Category::CursorLine))
-                        .into(),
-                ),
-                (HighlightName::Directory, Style::default().into()),
-                (
-                    HighlightName::DiffAdd,
-                    Style::default()
-                        .background(base.category_color(Category::DiffAdd))
-                        .into(),
-                ),
-                (
-                    HighlightName::DiffChange,
-                    Style::default()
-                        .background(base.category_color(Category::DiffChange))
-                        .into(),
-                ),
-                (
-                    HighlightName::DiffDelete,
-                    Style::default()
-                        .background(base.category_color(Category::DiffDelete))
-                        .into(),
-                ),
-                (
-                    HighlightName::DiffText,
-                    Style::default()
-                        .background(base.category_color(Category::DiffText))
-                        .into(),
-                ),
-                (HighlightName::EndOfBuffer, HighlightName::NonText.into()),
-                (
-                    HighlightName::TermCursor,
-                    Style::default()
-                        .background(base.category_color(Category::TermCursor))
-                        .into(),
-                ),
-                (
-                    HighlightName::TermCursorNC,
-                    Style::default()
-                        .background(base.category_color(Category::UnfocusedTermCursor))
-                        .into(),
-                ),
-                (
-                    HighlightName::ErrorMsg,
-                    Style::default()
-                        .foreground(base.diagnostic_level_color(DiagnosticLevel::Error))
-                        .into(),
-                ),
-                (
-                    HighlightName::WinSeparator,
-                    Style::default()
-                        .foreground(darken(base.category_color(Category::Normal), 0.95))
-                        .into(),
-                ),
-                (
-                    HighlightName::Folded,
-                    Style::default()
-                        .background(base.category_color(Category::Folded))
-                        .into(),
-                ),
-                (HighlightName::FoldColumn, Style::default().into()),
-                (HighlightName::SignColumn, Style::default().into()),
-                (HighlightName::IncSearch, HighlightName::CurSearch.into()),
-                (HighlightName::Substitute, HighlightName::IncSearch.into()),
-                (
-                    HighlightName::LineNr,
-                    Style::default()
-                        .foreground(base.category_color(Category::LineNumber))
-                        .into(),
-                ),
-                (HighlightName::LineNrAbove, HighlightName::LineNr.into()),
-                (HighlightName::LineNrBelow, HighlightName::LineNr.into()),
-                (
-                    HighlightName::CursorLineNr,
-                    Style::default()
-                        .foreground(base.category_color(Category::CursorLineNumber))
-                        .into(),
-                ),
-                (
-                    HighlightName::CursorLineFold,
-                    HighlightName::FoldColumn.into(),
-                ),
-                (
-                    HighlightName::CursorLineSign,
-                    HighlightName::SignColumn.into(),
-                ),
-                (
-                    HighlightName::MatchParen,
-                    Style::default()
-                        .foreground(base.category_color(Category::MatchedBracket))
-                        .into(),
-                ),
-                (
-                    HighlightName::ModeMsg,
-                    Style::default()
-                        .foreground(base.category_color(Category::ModeMessage))
-                        .into(),
-                ),
-                (HighlightName::MsgArea, Style::default().into()),
-                (
-                    HighlightName::MsgSeparator,
-                    Style::default()
-                        .foreground(base.category_color(Category::MessageSeparator))
-                        .into(),
-                ),
-                (HighlightName::MoreMsg, HighlightName::ModeMsg.into()),
-                (
-                    HighlightName::NonText,
-                    Style::default()
-                        .foreground(base.category_color(Category::NonText))
-                        .into(),
-                ),
-                (
-                    HighlightName::Normal,
-                    Style::default()
-                        .foreground(base.category_color(Category::Normal))
-                        .background(base.category_color(Category::NormalBackground))
-                        .into(),
-                ),
-                (HighlightName::NormalFloat, Style::default().into()),
-                (
-                    HighlightName::FloatBorder,
-                    HighlightName::WinSeparator.into(),
-                ),
-                (HighlightName::FloatTitle, HighlightName::Title.into()),
-                (HighlightName::NormalNC, Style::default().into()),
-                (HighlightName::Pmenu, Style::default().into()),
-                (HighlightName::PmenuSel, HighlightName::Visual.into()),
-                (HighlightName::PmenuKind, Style::default().into()),
-                (HighlightName::PmenuKindSel, HighlightName::Visual.into()),
-                (HighlightName::PmenuExtra, Style::default().into()),
-                (HighlightName::PmenuExtraSel, HighlightName::Visual.into()),
-                (
-                    HighlightName::PmenuSbar,
-                    Style::default()
-                        .foreground(lighten(
-                            base.category_color(Category::NormalBackground),
-                            0.1,
-                        ))
-                        .into(),
-                ),
-                (HighlightName::PmenuThumb, HighlightName::Pmenu.into()),
-                (
-                    HighlightName::Question,
-                    Style::default()
-                        .foreground(base.category_color(Category::Question))
-                        .into(),
-                ),
-                (HighlightName::QuickFixLine, Style::default().into()),
-                (
-                    HighlightName::Search,
-                    Style::default()
-                        .foreground(base.category_color(Category::Search))
-                        .background(base.category_color(Category::SearchMatch))
-                        .into(),
-                ),
-                (
-                    HighlightName::SpecialKey,
-                    Style::default()
-                        .foreground(base.category_color(Category::Special))
-                        .into(),
-                ),
-                (
-                    HighlightName::SpellBad,
-                    Style::default()
-                        .foreground(base.category_color(Category::BadSpelling))
-                        .into(),
-                ),
-                (HighlightName::SpellCap, HighlightName::SpellBad.into()),
-                (HighlightName::SpellLocal, HighlightName::SpellBad.into()),
-                (HighlightName::SpellRare, HighlightName::SpellBad.into()),
-                (
-                    HighlightName::StatusLine,
-                    Style::default()
-                        .background(base.category_color(Category::StatusLine))
-                        .into(),
-                ),
-                (
-                    HighlightName::StatusLineNC,
-                    Style::default()
-                        .background(darken(base.category_color(Category::StatusLine), 0.5))
-                        .into(),
-                ),
-                (
-                    HighlightName::TabLine,
-                    Style::default()
-                        .foreground(base.category_color(Category::InactiveTab))
-                        .background(base.category_color(Category::InactiveTabBackground))
-                        .into(),
-                ),
-                (HighlightName::TabLineFill, Style::default().into()),
-                (
-                    HighlightName::TabLineSel,
-                    Style::default()
-                        .foreground(base.category_color(Category::ActiveTab))
-                        .background(base.category_color(Category::ActiveTabBackground))
-                        .into(),
-                ),
-                (
-                    HighlightName::Title,
-                    Style::default()
-                        .foreground(base.category_color(Category::ActiveTab))
-                        .into(),
-                ),
-                (
-                    HighlightName::Visual,
-                    Style::default()
-                        .background(base.category_color(Category::Selection))
-                        .into(),
-                ),
-                (HighlightName::VisualNOS, HighlightName::Visual.into()),
-                (
-                    HighlightName::WarningMsg,
-                    Style::default()
-                        .foreground(base.diagnostic_level_color(DiagnosticLevel::Warning))
-                        .into(),
-                ),
-                (
-                    HighlightName::WhiteSpace,
-                    Style::default()
-                        .foreground(base.category_color(Category::Whitespace))
-                        .into(),
-                ),
-                (HighlightName::WildMenu, HighlightName::PmenuSel.into()),
-                (HighlightName::WinBar, HighlightName::TabLineSel.into()),
-                (HighlightName::WinBarNC, HighlightName::TabLine.into()),
-                (
-                    LspType::Class.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Type))
-                        .into(),
-                ),
-                (
-                    LspType::Const.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Constant))
-                        .into(),
-                ),
-                (
-                    LspType::ConstParameter.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::ConstGenericParameter))
-                        .into(),
-                ),
-                (
-                    LspType::Decorator.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Attribute))
-                        .into(),
-                ),
-                (
-                    LspType::Derive.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Interface))
-                        .into(),
-                ),
-                (
-                    LspType::Enum.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Enum))
-                        .into(),
-                ),
-                (
-                    LspType::EnumMember.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Variant))
-                        .into(),
-                ),
-                (
-                    LspType::Function.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Function))
-                        .into(),
-                ),
-                (
-                    LspType::Interface.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Interface))
-                        .into(),
-                ),
-                (
-                    LspType::Keyword.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Keyword))
-                        .into(),
-                ),
-                (
-                    LspType::Macro.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Macro))
-                        .into(),
-                ),
-                (
-                    LspType::Method.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Function))
-                        .into(),
-                ),
-                (
-                    LspType::Namespace.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Module))
-                        .into(),
-                ),
-                (
-                    LspType::Parameter.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Parameter))
-                        .into(),
-                ),
-                (
-                    LspType::Property.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Field))
-                        .into(),
-                ),
-                (
-                    LspType::Static.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Static))
-                        .into(),
-                ),
-                (
-                    LspType::Struct.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Type))
-                        .into(),
-                ),
-                (
-                    LspType::Type.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Type))
-                        .into(),
-                ),
-                (
-                    LspType::TypeAlias.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Type))
-                        .into(),
-                ),
-                (
-                    LspType::TypeParameter.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::TypeParameter))
-                        .into(),
-                ),
-                (
-                    LspType::Variable.into(),
-                    Style::default()
-                        .foreground(base.token_color(Token::Variable))
-                        .into(),
-                ),
-                (
-                    HighlightName::Boolean,
-                    Style::default()
-                        .foreground(base.token_color(Token::Boolean))
-                        .into(),
-                ),
-                (
-                    HighlightName::Character,
-                    Style::default()
-                        .foreground(base.token_color(Token::Character))
-                        .into(),
-                ),
-                (
-                    HighlightName::Comment,
-                    Style::default()
-                        .foreground(base.token_color(Token::Comment))
-                        .into(),
-                ),
-                (HighlightName::Conditional, HighlightName::Keyword.into()),
-                (
-                    HighlightName::Constant,
-                    Style::default()
-                        .foreground(base.token_color(Token::Constant))
-                        .into(),
-                ),
-                (HighlightName::Debug, Style::default().into()),
-                (HighlightName::Define, HighlightName::Macro.into()),
-                (
-                    HighlightName::Delimiter,
-                    Style::default()
-                        .foreground(base.token_color(Token::Delimiter))
-                        .into(),
-                ),
-                (
-                    HighlightName::Error,
-                    Style::default()
-                        .foreground(base.diagnostic_level_color(DiagnosticLevel::Error))
-                        .into(),
-                ),
-                (HighlightName::Exception, HighlightName::Keyword.into()),
-                (
-                    HighlightName::Float,
-                    Style::default()
-                        .foreground(base.token_color(Token::Float))
-                        .into(),
-                ),
-                (
-                    HighlightName::Function,
-                    Style::default()
-                        .foreground(base.token_color(Token::Function))
-                        .into(),
-                ),
-                (
-                    HighlightName::Identifier,
-                    Style::default()
-                        .foreground(base.token_color(Token::Identifier))
-                        .into(),
-                ),
-                (
-                    HighlightName::Include,
-                    Style::default()
-                        .foreground(base.token_color(Token::Module))
-                        .into(),
-                ),
-                (
-                    HighlightName::Keyword,
-                    Style::default()
-                        .foreground(base.token_color(Token::Keyword))
-                        .into(),
-                ),
-                (HighlightName::Label, HighlightName::Keyword.into()),
-                (
-                    HighlightName::Macro,
-                    Style::default()
-                        .foreground(base.token_color(Token::Macro))
-                        .into(),
-                ),
-                (
-                    HighlightName::Number,
-                    Style::default()
-                        .foreground(base.token_color(Token::Integer))
-                        .into(),
-                ),
-                (
-                    HighlightName::Operator,
-                    Style::default()
-                        .foreground(base.token_color(Token::Operator))
-                        .into(),
-                ),
-                (HighlightName::PreCondit, HighlightName::Macro.into()),
-                (HighlightName::PreProc, HighlightName::Macro.into()),
-                (HighlightName::Repeat, HighlightName::Keyword.into()),
-                (HighlightName::Special, HighlightName::SpecialChar.into()),
-                (
-                    HighlightName::SpecialChar,
-                    Style::default()
-                        .foreground(base.category_color(Category::Special))
-                        .into(),
-                ),
-                (HighlightName::SpecialComment, HighlightName::Comment.into()),
-                (HighlightName::Statement, HighlightName::Keyword.into()),
-                (HighlightName::StorageClass, HighlightName::Keyword.into()),
-                (
-                    HighlightName::String,
-                    Style::default()
-                        .foreground(base.token_color(Token::String))
-                        .into(),
-                ),
-                (HighlightName::Structure, HighlightName::Type.into()),
-                (
-                    HighlightName::Tag,
-                    Style::default()
-                        .foreground(base.token_color(Token::Tag))
-                        .into(),
-                ),
-                (
-                    HighlightName::Todo,
-                    Style::default()
-                        .foreground(base.token_color(Token::Todo))
-                        .into(),
-                ),
-                (
-                    HighlightName::Type,
-                    Style::default()
-                        .foreground(base.token_color(Token::Type))
-                        .into(),
-                ),
-                (HighlightName::Typedef, HighlightName::Type.into()),
-                (
-                    HighlightName::Underlined,
-                    Style::default()
-                        .foreground(base.token_color(Token::Link))
-                        .into(),
-                ),
-            ]
-            .into_iter()
-            .chain(
-                enum_iterator::all::<(DiagnosticLevel, Option<DiagnosticUiKind>)>().map(
-                    |(level, kind)| {
-                        let color = base.diagnostic_level_color(level);
-                        let style = match kind {
-                            None => Style::default().foreground(color),
-                            Some(DiagnosticUiKind::Underline) => {
-                                Style::default().special(color).curly_underline()
-                            }
-                            Some(DiagnosticUiKind::VirtualText) => Style::default()
-                                .foreground(color)
-                                .background(darken(color, 0.95)),
-                        };
-                        (
-                            HighlightName::Diagnostic(Diagnostic { level, kind }),
-                            style.into(),
-                        )
-                    },
-                ),
-            )
-            .chain([
-                (HighlightName::DiagnosticDeprecated, Style::default().into()),
-                (
-                    HighlightName::DiagnosticUnnecessary,
-                    Style::default().into(),
-                ),
-                (
-                    HighlightName::MarkdownCode,
-                    Style::default()
-                        .foreground(base.token_color(Token::Identifier))
-                        .into(),
-                ),
-                (
-                    HighlightName::MarkdownCodeBlock,
-                    Style::default()
-                        .foreground(base.token_color(Token::String))
-                        .into(),
-                ),
-                (
-                    HighlightName::MarkdownH1,
-                    Style::default()
-                        .foreground(base.token_color(Token::Module))
-                        .into(),
-                ),
-                (HighlightName::MarkdownH2, HighlightName::MarkdownH1.into()),
-                (
-                    HighlightName::MarkdownHeadingDelimiter,
-                    HighlightName::Delimiter.into(),
-                ),
-                (
-                    HighlightName::MarkdownLinkText,
-                    Style::default()
-                        .foreground(base.token_color(Token::Link))
-                        .into(),
-                ),
-                (
-                    HighlightName::TomlTable,
-                    Style::default()
-                        .foreground(base.token_color(Token::Module))
-                        .into(),
-                ),
-                (
-                    HighlightName::CmpItemAbbrMatch,
-                    HighlightName::Special.into(),
-                ),
-                (
-                    HighlightName::CmpItemAbbrMatchFuzzy,
-                    HighlightName::Special.into(),
-                ),
-            ])
-            .chain(enum_iterator::all::<LspType>().map(|lsp_type| {
-                (
-                    HighlightName::CmpItemKind(lsp_type),
-                    HighlightName::from(lsp_type).into(),
-                )
-            }))
-            .chain([
-                (
-                    HighlightName::TelescopeBorder,
-                    HighlightName::FloatBorder.into(),
-                ),
-                (HighlightName::TelescopeTitle, HighlightName::Title.into()),
-                (
-                    HighlightName::LspInfoBorder,
-                    HighlightName::FloatBorder.into(),
-                ),
-            ])
-            .collect(),
+            name: name.into(),
+            dark_highlights: build_highlights(dark_base),
+            light_highlights: build_highlights(light_base),
         }
     }
 
@@ -1138,59 +554,14 @@ impl NeovimTheme {
     }
 
     pub fn write<W: Write>(&self, mut writer: W) -> Result<(), io::Error> {
-        writeln!(writer, "local highlights = {{")?;
-        let indent = "    ";
-        let mut highlights = self
-            .highlights
-            .iter()
-            .map(|(k, v)| (k.clone(), v.clone()))
-            .collect::<Vec<_>>();
-        highlights.sort_by_cached_key(|(a, _)| a.to_string());
-        for (key, h) in &highlights {
-            writeln!(writer, r#"  ["{key}"] = {{"#)?;
-            match h {
-                Highlight::Value(style) => {
-                    if let Some(fg) = style.foreground {
-                        writeln!(writer, r#"{indent}fg = "{}","#, CssColor(fg))?;
-                    }
-                    if let Some(bg) = style.background {
-                        writeln!(writer, r#"{indent}bg = "{}","#, CssColor(bg))?;
-                    }
-                    if let Some(c) = style.special {
-                        writeln!(writer, r#"{indent}sp = "{}","#, CssColor(c))?;
-                    }
-                    if let Some(bold) = style.bold {
-                        writeln!(writer, "{indent}bold = {bold},")?;
-                    }
-                    if let Some(underline) = style.underline {
-                        const EFFECTS: &[(UnderlineStyle, &str)] = &[
-                            (UnderlineStyle::Single, "underline"),
-                            (UnderlineStyle::Double, "underdouble"),
-                            (UnderlineStyle::Curly, "undercurl"),
-                            (UnderlineStyle::Dotted, "underdotted"),
-                            (UnderlineStyle::Dashed, "underdashed"),
-                        ];
-                        let key = EFFECTS
-                            .iter()
-                            .find_map(|&(kind, key)| (kind == underline).then_some(key));
-                        if let Some(key) = key {
-                            writeln!(writer, "{indent}{key} = true,")?;
-                        }
-                    }
-                    if let Some(strikethrough) = style.strikethrough {
-                        writeln!(writer, "{indent}strikethrough = {strikethrough},")?;
-                    }
-                    if let Some(italic) = style.italic {
-                        writeln!(writer, "{indent}italic = {italic},")?;
-                    }
-                    writeln!(writer, "{indent}reverse = {},", style.reversed)?;
-                }
-                Highlight::Link(link) => writeln!(writer, r#"{indent}link = "{link}","#)?,
-            }
-            writeln!(writer, "  }},")?;
-        }
-        writeln!(writer, "}}")?;
+        writeln!(writer, "local highlights")?;
+        writeln!(writer, r#"if vim.o.background == "light" then"#)?;
+        write_highlights(&mut writer, Indent::default().inc(), &self.light_highlights)?;
+        writeln!(writer, "else")?;
+        write_highlights(&mut writer, Indent::default().inc(), &self.dark_highlights)?;
+        writeln!(writer, "end")?;
         writeln!(writer)?;
+        writeln!(writer, r#"vim.g.colors_name = "{}""#, self.name)?;
         const CODE: &str = include_str!("theme.lua");
         write!(writer, "{CODE}")?;
         Ok(())
@@ -1206,5 +577,689 @@ impl Display for CssColor {
             red, green, blue, ..
         } = self.0;
         write!(f, "#{red:02x}{green:02x}{blue:02x}")
+    }
+}
+
+fn build_highlights<T: Theme>(base: &T) -> HashMap<HighlightName, Highlight> {
+    vec![
+        (
+            HighlightName::ColorColumn,
+            Style::default()
+                .background(base.category_color(Category::ColumnGuide))
+                .into(),
+        ),
+        (HighlightName::Conceal, Style::default().into()),
+        (
+            HighlightName::CurSearch,
+            Style::default()
+                .foreground(base.category_color(Category::Search))
+                .background(base.category_color(Category::ActiveSearchMatch))
+                .into(),
+        ),
+        (HighlightName::Cursor, Style::reverse().into()),
+        (HighlightName::CursorIM, HighlightName::Cursor.into()),
+        (HighlightName::CursorColumn, Style::default().into()),
+        (
+            HighlightName::CursorLine,
+            Style::default()
+                .background(base.category_color(Category::CursorLine))
+                .into(),
+        ),
+        (HighlightName::Directory, Style::default().into()),
+        (
+            HighlightName::DiffAdd,
+            Style::default()
+                .background(base.category_color(Category::DiffAdd))
+                .into(),
+        ),
+        (
+            HighlightName::DiffChange,
+            Style::default()
+                .background(base.category_color(Category::DiffChange))
+                .into(),
+        ),
+        (
+            HighlightName::DiffDelete,
+            Style::default()
+                .background(base.category_color(Category::DiffDelete))
+                .into(),
+        ),
+        (
+            HighlightName::DiffText,
+            Style::default()
+                .background(base.category_color(Category::DiffText))
+                .into(),
+        ),
+        (HighlightName::EndOfBuffer, HighlightName::NonText.into()),
+        (
+            HighlightName::TermCursor,
+            Style::default()
+                .background(base.category_color(Category::TermCursor))
+                .into(),
+        ),
+        (
+            HighlightName::TermCursorNC,
+            Style::default()
+                .background(base.category_color(Category::UnfocusedTermCursor))
+                .into(),
+        ),
+        (
+            HighlightName::ErrorMsg,
+            Style::default()
+                .foreground(base.diagnostic_level_color(DiagnosticLevel::Error))
+                .into(),
+        ),
+        (
+            HighlightName::WinSeparator,
+            Style::default()
+                .foreground(darken(base.category_color(Category::Normal), 0.95))
+                .into(),
+        ),
+        (
+            HighlightName::Folded,
+            Style::default()
+                .background(base.category_color(Category::Folded))
+                .into(),
+        ),
+        (HighlightName::FoldColumn, Style::default().into()),
+        (HighlightName::SignColumn, Style::default().into()),
+        (HighlightName::IncSearch, HighlightName::CurSearch.into()),
+        (HighlightName::Substitute, HighlightName::IncSearch.into()),
+        (
+            HighlightName::LineNr,
+            Style::default()
+                .foreground(base.category_color(Category::LineNumber))
+                .into(),
+        ),
+        (HighlightName::LineNrAbove, HighlightName::LineNr.into()),
+        (HighlightName::LineNrBelow, HighlightName::LineNr.into()),
+        (
+            HighlightName::CursorLineNr,
+            Style::default()
+                .foreground(base.category_color(Category::CursorLineNumber))
+                .into(),
+        ),
+        (
+            HighlightName::CursorLineFold,
+            HighlightName::FoldColumn.into(),
+        ),
+        (
+            HighlightName::CursorLineSign,
+            HighlightName::SignColumn.into(),
+        ),
+        (
+            HighlightName::MatchParen,
+            Style::default()
+                .foreground(base.category_color(Category::MatchedBracket))
+                .into(),
+        ),
+        (
+            HighlightName::ModeMsg,
+            Style::default()
+                .foreground(base.category_color(Category::ModeMessage))
+                .into(),
+        ),
+        (HighlightName::MsgArea, Style::default().into()),
+        (
+            HighlightName::MsgSeparator,
+            Style::default()
+                .foreground(base.category_color(Category::MessageSeparator))
+                .into(),
+        ),
+        (HighlightName::MoreMsg, HighlightName::ModeMsg.into()),
+        (
+            HighlightName::NonText,
+            Style::default()
+                .foreground(base.category_color(Category::NonText))
+                .into(),
+        ),
+        (
+            HighlightName::Normal,
+            Style::default()
+                .foreground(base.category_color(Category::Normal))
+                .background(base.category_color(Category::NormalBackground))
+                .into(),
+        ),
+        (HighlightName::NormalFloat, Style::default().into()),
+        (
+            HighlightName::FloatBorder,
+            HighlightName::WinSeparator.into(),
+        ),
+        (HighlightName::FloatTitle, HighlightName::Title.into()),
+        (HighlightName::NormalNC, Style::default().into()),
+        (HighlightName::Pmenu, Style::default().into()),
+        (HighlightName::PmenuSel, HighlightName::Visual.into()),
+        (HighlightName::PmenuKind, Style::default().into()),
+        (HighlightName::PmenuKindSel, HighlightName::Visual.into()),
+        (HighlightName::PmenuExtra, Style::default().into()),
+        (HighlightName::PmenuExtraSel, HighlightName::Visual.into()),
+        (
+            HighlightName::PmenuSbar,
+            Style::default()
+                .foreground(lighten(
+                    base.category_color(Category::NormalBackground),
+                    0.1,
+                ))
+                .into(),
+        ),
+        (HighlightName::PmenuThumb, HighlightName::Pmenu.into()),
+        (
+            HighlightName::Question,
+            Style::default()
+                .foreground(base.category_color(Category::Question))
+                .into(),
+        ),
+        (HighlightName::QuickFixLine, Style::default().into()),
+        (
+            HighlightName::Search,
+            Style::default()
+                .foreground(base.category_color(Category::Search))
+                .background(base.category_color(Category::SearchMatch))
+                .into(),
+        ),
+        (
+            HighlightName::SpecialKey,
+            Style::default()
+                .foreground(base.category_color(Category::Special))
+                .into(),
+        ),
+        (
+            HighlightName::SpellBad,
+            Style::default()
+                .foreground(base.category_color(Category::BadSpelling))
+                .into(),
+        ),
+        (HighlightName::SpellCap, HighlightName::SpellBad.into()),
+        (HighlightName::SpellLocal, HighlightName::SpellBad.into()),
+        (HighlightName::SpellRare, HighlightName::SpellBad.into()),
+        (
+            HighlightName::StatusLine,
+            Style::default()
+                .background(base.category_color(Category::StatusLine))
+                .into(),
+        ),
+        (
+            HighlightName::StatusLineNC,
+            Style::default()
+                .background(darken(base.category_color(Category::StatusLine), 0.5))
+                .into(),
+        ),
+        (
+            HighlightName::TabLine,
+            Style::default()
+                .foreground(base.category_color(Category::InactiveTab))
+                .background(base.category_color(Category::InactiveTabBackground))
+                .into(),
+        ),
+        (HighlightName::TabLineFill, Style::default().into()),
+        (
+            HighlightName::TabLineSel,
+            Style::default()
+                .foreground(base.category_color(Category::ActiveTab))
+                .background(base.category_color(Category::ActiveTabBackground))
+                .into(),
+        ),
+        (
+            HighlightName::Title,
+            Style::default()
+                .foreground(base.category_color(Category::ActiveTab))
+                .into(),
+        ),
+        (
+            HighlightName::Visual,
+            Style::default()
+                .background(base.category_color(Category::Selection))
+                .into(),
+        ),
+        (HighlightName::VisualNOS, HighlightName::Visual.into()),
+        (
+            HighlightName::WarningMsg,
+            Style::default()
+                .foreground(base.diagnostic_level_color(DiagnosticLevel::Warning))
+                .into(),
+        ),
+        (
+            HighlightName::WhiteSpace,
+            Style::default()
+                .foreground(base.category_color(Category::Whitespace))
+                .into(),
+        ),
+        (HighlightName::WildMenu, HighlightName::PmenuSel.into()),
+        (HighlightName::WinBar, HighlightName::TabLineSel.into()),
+        (HighlightName::WinBarNC, HighlightName::TabLine.into()),
+        (
+            LspType::Class.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Type))
+                .into(),
+        ),
+        (
+            LspType::Const.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Constant))
+                .into(),
+        ),
+        (
+            LspType::ConstParameter.into(),
+            Style::default()
+                .foreground(base.token_color(Token::ConstGenericParameter))
+                .into(),
+        ),
+        (
+            LspType::Decorator.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Attribute))
+                .into(),
+        ),
+        (
+            LspType::Derive.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Interface))
+                .into(),
+        ),
+        (
+            LspType::Enum.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Enum))
+                .into(),
+        ),
+        (
+            LspType::EnumMember.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Variant))
+                .into(),
+        ),
+        (
+            LspType::Function.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Function))
+                .into(),
+        ),
+        (
+            LspType::Interface.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Interface))
+                .into(),
+        ),
+        (
+            LspType::Keyword.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Keyword))
+                .into(),
+        ),
+        (
+            LspType::Macro.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Macro))
+                .into(),
+        ),
+        (
+            LspType::Method.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Function))
+                .into(),
+        ),
+        (
+            LspType::Namespace.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Module))
+                .into(),
+        ),
+        (
+            LspType::Parameter.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Parameter))
+                .into(),
+        ),
+        (
+            LspType::Property.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Field))
+                .into(),
+        ),
+        (
+            LspType::SelfKeyword.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Keyword))
+                .into(),
+        ),
+        (
+            LspType::Static.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Static))
+                .into(),
+        ),
+        (
+            LspType::Struct.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Type))
+                .into(),
+        ),
+        (
+            LspType::Type.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Type))
+                .into(),
+        ),
+        (
+            LspType::TypeAlias.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Type))
+                .into(),
+        ),
+        (
+            LspType::TypeParameter.into(),
+            Style::default()
+                .foreground(base.token_color(Token::TypeParameter))
+                .into(),
+        ),
+        (
+            LspType::Variable.into(),
+            Style::default()
+                .foreground(base.token_color(Token::Variable))
+                .into(),
+        ),
+        (
+            HighlightName::Boolean,
+            Style::default()
+                .foreground(base.token_color(Token::Boolean))
+                .into(),
+        ),
+        (
+            HighlightName::Character,
+            Style::default()
+                .foreground(base.token_color(Token::Character))
+                .into(),
+        ),
+        (
+            HighlightName::Comment,
+            Style::default()
+                .foreground(base.token_color(Token::Comment))
+                .into(),
+        ),
+        (HighlightName::Conditional, HighlightName::Keyword.into()),
+        (
+            HighlightName::Constant,
+            Style::default()
+                .foreground(base.token_color(Token::Constant))
+                .into(),
+        ),
+        (HighlightName::Debug, Style::default().into()),
+        (HighlightName::Define, HighlightName::Macro.into()),
+        (
+            HighlightName::Delimiter,
+            Style::default()
+                .foreground(base.token_color(Token::Delimiter))
+                .into(),
+        ),
+        (
+            HighlightName::Error,
+            Style::default()
+                .foreground(base.diagnostic_level_color(DiagnosticLevel::Error))
+                .into(),
+        ),
+        (HighlightName::Exception, HighlightName::Keyword.into()),
+        (
+            HighlightName::Float,
+            Style::default()
+                .foreground(base.token_color(Token::Float))
+                .into(),
+        ),
+        (
+            HighlightName::Function,
+            Style::default()
+                .foreground(base.token_color(Token::Function))
+                .into(),
+        ),
+        (
+            HighlightName::Identifier,
+            Style::default()
+                .foreground(base.token_color(Token::Identifier))
+                .into(),
+        ),
+        (
+            HighlightName::Include,
+            Style::default()
+                .foreground(base.token_color(Token::Module))
+                .into(),
+        ),
+        (
+            HighlightName::Keyword,
+            Style::default()
+                .foreground(base.token_color(Token::Keyword))
+                .into(),
+        ),
+        (HighlightName::Label, HighlightName::Keyword.into()),
+        (
+            HighlightName::Macro,
+            Style::default()
+                .foreground(base.token_color(Token::Macro))
+                .into(),
+        ),
+        (
+            HighlightName::Number,
+            Style::default()
+                .foreground(base.token_color(Token::Integer))
+                .into(),
+        ),
+        (
+            HighlightName::Operator,
+            Style::default()
+                .foreground(base.token_color(Token::Operator))
+                .into(),
+        ),
+        (HighlightName::PreCondit, HighlightName::Macro.into()),
+        (HighlightName::PreProc, HighlightName::Macro.into()),
+        (HighlightName::Repeat, HighlightName::Keyword.into()),
+        (HighlightName::Special, HighlightName::SpecialChar.into()),
+        (
+            HighlightName::SpecialChar,
+            Style::default()
+                .foreground(base.category_color(Category::Special))
+                .into(),
+        ),
+        (HighlightName::SpecialComment, HighlightName::Comment.into()),
+        (HighlightName::Statement, HighlightName::Keyword.into()),
+        (HighlightName::StorageClass, HighlightName::Keyword.into()),
+        (
+            HighlightName::String,
+            Style::default()
+                .foreground(base.token_color(Token::String))
+                .into(),
+        ),
+        (HighlightName::Structure, HighlightName::Type.into()),
+        (
+            HighlightName::Tag,
+            Style::default()
+                .foreground(base.token_color(Token::Tag))
+                .into(),
+        ),
+        (
+            HighlightName::Todo,
+            Style::default()
+                .foreground(base.token_color(Token::Todo))
+                .into(),
+        ),
+        (
+            HighlightName::Type,
+            Style::default()
+                .foreground(base.token_color(Token::Type))
+                .into(),
+        ),
+        (HighlightName::Typedef, HighlightName::Type.into()),
+        (
+            HighlightName::Underlined,
+            Style::default()
+                .foreground(base.token_color(Token::Link))
+                .into(),
+        ),
+    ]
+    .into_iter()
+    .chain(
+        enum_iterator::all::<(DiagnosticLevel, Option<DiagnosticUiKind>)>().map(|(level, kind)| {
+            let color = base.diagnostic_level_color(level);
+            let style = match kind {
+                None => Style::default().foreground(color),
+                Some(DiagnosticUiKind::Underline) => {
+                    Style::default().special(color).curly_underline()
+                }
+                Some(DiagnosticUiKind::VirtualText) => Style::default()
+                    .foreground(color)
+                    .background(darken(color, 0.95)),
+            };
+            (
+                HighlightName::Diagnostic(Diagnostic { level, kind }),
+                style.into(),
+            )
+        }),
+    )
+    .chain([
+        (HighlightName::DiagnosticDeprecated, Style::default().into()),
+        (
+            HighlightName::DiagnosticUnnecessary,
+            Style::default().into(),
+        ),
+        (
+            HighlightName::MarkdownCode,
+            Style::default()
+                .foreground(base.token_color(Token::Identifier))
+                .into(),
+        ),
+        (
+            HighlightName::MarkdownCodeBlock,
+            Style::default()
+                .foreground(base.token_color(Token::String))
+                .into(),
+        ),
+        (
+            HighlightName::MarkdownH1,
+            Style::default()
+                .foreground(base.token_color(Token::Module))
+                .into(),
+        ),
+        (HighlightName::MarkdownH2, HighlightName::MarkdownH1.into()),
+        (
+            HighlightName::MarkdownHeadingDelimiter,
+            HighlightName::Delimiter.into(),
+        ),
+        (
+            HighlightName::MarkdownLinkText,
+            Style::default()
+                .foreground(base.token_color(Token::Link))
+                .into(),
+        ),
+        (
+            HighlightName::TomlTable,
+            Style::default()
+                .foreground(base.token_color(Token::Module))
+                .into(),
+        ),
+        (
+            HighlightName::CmpItemAbbrMatch,
+            HighlightName::Special.into(),
+        ),
+        (
+            HighlightName::CmpItemAbbrMatchFuzzy,
+            HighlightName::Special.into(),
+        ),
+    ])
+    .chain(enum_iterator::all::<LspType>().map(|lsp_type| {
+        (
+            HighlightName::CmpItemKind(lsp_type),
+            HighlightName::from(lsp_type).into(),
+        )
+    }))
+    .chain([
+        (
+            HighlightName::TelescopeBorder,
+            HighlightName::FloatBorder.into(),
+        ),
+        (HighlightName::TelescopeTitle, HighlightName::Title.into()),
+        (
+            HighlightName::LspInfoBorder,
+            HighlightName::FloatBorder.into(),
+        ),
+    ])
+    .collect()
+}
+
+fn write_highlights<W>(
+    writer: &mut W,
+    indent: Indent,
+    highlights: &HashMap<HighlightName, Highlight>,
+) -> io::Result<()>
+where
+    W: Write,
+{
+    let mut highlights = highlights
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect::<Vec<_>>();
+    highlights.sort_by_cached_key(|(a, _)| a.to_string());
+    writeln!(writer, "{indent}highlights = {{")?;
+    let key_indent = indent.inc();
+    let field_indent = key_indent.inc();
+    for (key, h) in &highlights {
+        writeln!(writer, r#"{key_indent}["{key}"] = {{"#)?;
+        match h {
+            Highlight::Value(style) => {
+                if let Some(fg) = style.foreground {
+                    writeln!(writer, r#"{field_indent}fg = "{}","#, CssColor(fg))?;
+                }
+                if let Some(bg) = style.background {
+                    writeln!(writer, r#"{field_indent}bg = "{}","#, CssColor(bg))?;
+                }
+                if let Some(c) = style.special {
+                    writeln!(writer, r#"{field_indent}sp = "{}","#, CssColor(c))?;
+                }
+                if let Some(bold) = style.bold {
+                    writeln!(writer, "{field_indent}bold = {bold},")?;
+                }
+                if let Some(underline) = style.underline {
+                    const EFFECTS: &[(UnderlineStyle, &str)] = &[
+                        (UnderlineStyle::Single, "underline"),
+                        (UnderlineStyle::Double, "underdouble"),
+                        (UnderlineStyle::Curly, "undercurl"),
+                        (UnderlineStyle::Dotted, "underdotted"),
+                        (UnderlineStyle::Dashed, "underdashed"),
+                    ];
+                    let key = EFFECTS
+                        .iter()
+                        .find_map(|&(kind, key)| (kind == underline).then_some(key));
+                    if let Some(key) = key {
+                        writeln!(writer, "{field_indent}{key} = true,")?;
+                    }
+                }
+                if let Some(strikethrough) = style.strikethrough {
+                    writeln!(writer, "{field_indent}strikethrough = {strikethrough},")?;
+                }
+                if let Some(italic) = style.italic {
+                    writeln!(writer, "{field_indent}italic = {italic},")?;
+                }
+                writeln!(writer, "{field_indent}reverse = {},", style.reversed)?;
+            }
+            Highlight::Link(link) => writeln!(writer, r#"{field_indent}link = "{link}","#)?,
+        }
+        writeln!(writer, "{key_indent}}},")?;
+    }
+    writeln!(writer, "{indent}}}")?;
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct Indent(usize);
+
+impl Indent {
+    fn inc(self) -> Self {
+        Self(self.0 + 1)
+    }
+}
+
+impl Display for Indent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for _ in 0..2 * self.0 {
+            fmt::Write::write_char(f, ' ')?;
+        }
+        Ok(())
     }
 }
