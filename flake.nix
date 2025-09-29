@@ -32,7 +32,7 @@
             version = syntinct.version;
             src = pkgs.runCommand "${name}-src" themeAttrs ''
               mkdir -p $out/colors
-              ${syntinct}/bin/syntinct > $out/colors/${name}.lua
+              ${syntinct}/bin/syntinct generate ${name} > $out/colors/${name}.lua
             '';
             meta = {
               description = desc;
