@@ -5,6 +5,7 @@ authors = ["Stephane Raux <stephaneyfx@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.5.48", features = ["derive"] }
 enum-iterator = "1.4.1"
 heck = "0.4.1"
 palette = "0.7.3"
