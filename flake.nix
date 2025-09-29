@@ -22,7 +22,7 @@
             version = syntinct.version;
             buildInputs = [syntinct];
           };
-          syntark = makeTheme { name = "syntark", desc = "Dark neovim theme"; };
+          syntark = makeTheme { name = "syntark"; desc = "Dark neovim theme"; };
           thematic = makeTheme {
             name = "thematic";
             desc = "Dark and light neovim themes with a focus on semantics";
@@ -39,7 +39,7 @@
               homepage = "https://github.com/stephaneyfx/syntinct";
               license = pkgs.lib.licenses.bsd0;
             };
-          }
+          };
         in {
           inherit syntark syntinct thematic;
         };
