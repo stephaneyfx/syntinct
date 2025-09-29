@@ -33,7 +33,7 @@
             meta = {
               description = "Dark color theme for neovim";
               homepage = "https://github.com/stephaneyfx/syntinct";
-              license = pkgs.lib.licenses.mit;
+              license = pkgs.lib.licenses.bsd0;
             };
           };
         in {
