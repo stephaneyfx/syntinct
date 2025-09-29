@@ -18,26 +18,30 @@
             src = ./.;
             cargoLock.lockFile = ./Cargo.lock;
           };
-          syntark-attrs = {
+          themeAttrs = {
             version = syntinct.version;
             buildInputs = [syntinct];
           };
-          syntark-src = pkgs.runCommand "syntark-src" syntark-attrs ''
-            mkdir -p $out/colors
-            ${syntinct}/bin/syntinct > $out/colors/syntark.lua
-          '';
-          syntark = pkgs.vimUtils.buildVimPlugin {
-            pname = "syntark";
+          syntark = makeTheme { name = "syntark", desc = "Dark neovim theme"; };
+          thematic = makeTheme {
+            name = "thematic";
+            desc = "Dark and light neovim themes with a focus on semantics";
+          };
+          makeTheme = { name, desc }: pkgs.vimUtils.buildVimPlugin {
+            pname = name;
             version = syntinct.version;
-            src = syntark-src;
+            src = pkgs.runCommand "${name}-src" themeAttrs ''
+              mkdir -p $out/colors
+              ${syntinct}/bin/syntinct > $out/colors/${name}.lua
+            '';
             meta = {
-              description = "Dark color theme for neovim";
+              description = desc;
               homepage = "https://github.com/stephaneyfx/syntinct";
               license = pkgs.lib.licenses.bsd0;
             };
-          };
+          }
         in {
-          inherit syntark syntinct;
+          inherit syntark syntinct thematic;
         };
     in {
       overlays.default = final: prev: packagesFor final;
